@@ -3,26 +3,21 @@ import openai
 from datetime import datetime
 import requests
 
-# Initialize memory storage for user preferences (acting as a simple memory agent)
 user_memory = {}
 
-# Set up OpenAI API Key
 openai.api_key = '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'  # Replace with your actual API key
 
 import time
 from datetime import datetime, timedelta
 
-# Global cache and timestamp to track API requests
 cache = {}
-last_api_call = datetime.now() - timedelta(minutes=1)  # Ensure initial value is past time
+last_api_call = datetime.now() - timedelta(minutes=1)  
 
 def call_llm_api(prompt):
     global last_api_call
-    # Check if prompt is cached to reduce API calls
     if prompt in cache:
         return cache[prompt]
     
-    # Implement basic rate limiting
     if datetime.now() - last_api_call < timedelta(seconds=10):  # Wait 10 seconds between calls
         st.warning("Please wait a few seconds between requests to avoid rate limits.")
         time.sleep(10)
@@ -42,17 +37,14 @@ def call_llm_api(prompt):
 
 
 
-# Function to simulate dynamic itinerary based on user preferences
 def generate_itinerary(city, start_time, end_time, interests, budget, starting_point):
     itinerary_prompt = (f"Plan a one-day tour in {city} starting from {starting_point}. "
                         f"The user is interested in {', '.join(interests)} with a budget of {budget}. "
                         f"Start time is {start_time} and end time is {end_time}.")
     return call_llm_api(itinerary_prompt)
 
-# Streamlit User Interface
 st.title("One-Day Tour Planning Assistant")
 
-# Collect User Preferences
 if "city" not in user_memory:
     user_memory["city"] = st.text_input("Which city would you like to visit?")
 
@@ -77,7 +69,6 @@ if "budget" not in user_memory:
 if "starting_point" not in user_memory:
     user_memory["starting_point"] = st.text_input("Enter your starting point")
 
-# Generate Initial Itinerary
 if st.button("Generate Itinerary"):
     itinerary = generate_itinerary(
         user_memory["city"],
@@ -90,24 +81,20 @@ if st.button("Generate Itinerary"):
     st.write("### Your Itinerary")
     st.write(itinerary)
 
-# Allow User to Adjust Preferences
 st.write("### Adjust Your Preferences")
 adjustments = st.text_area("Enter any changes or additional preferences")
 if st.button("Update Itinerary"):
-    # Update memory and regenerate itinerary based on user adjustments
     adjusted_prompt = f"{itinerary}. Update the itinerary based on: {adjustments}"
     updated_itinerary = call_llm_api(adjusted_prompt)
     st.write("### Updated Itinerary")
     st.write(updated_itinerary)
 
-# Show personalized message and final itinerary
 if st.button("Finalize Plan"):
     st.write("### Finalized Itinerary")
     st.write(itinerary)
 
-# Optional: Show Weather Information (External API call)
 if "date" in user_memory and "city" in user_memory:
-    weather_api_key = 'YOUR_WEATHER_API_KEY'  # Replace with actual API key
+    weather_api_key = 'YOUR_WEATHER_API_KEY'  
     city = user_memory["city"]
     weather_response = requests.get(f"http://api.weatherapi.com/v1/forecast.json?key={weather_api_key}&q={city}&days=1")
     if weather_response.status_code == 200:
